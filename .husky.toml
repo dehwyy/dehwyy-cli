@@ -1,0 +1,6 @@
+[hooks]
+
+# running test before commit
+pre-commit = [
+  "make test"
+]

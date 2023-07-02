@@ -4,9 +4,9 @@ import "github.com/spf13/cobra"
 
 var (
 	rootCmd = &cobra.Command{
-		Use:   "prettify",
-		Short: "CLI tool for print text",
-		Long: `CLI tool for print text in different styles`,
+		Use:   "dehwyy",
+		Short: "CLI by dehwyy",
+		Long: `CLI made by dehwyy for some unknown reason`,
 	}
 )
 
