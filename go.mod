@@ -1,4 +1,4 @@
-module dehwyy
+module github.com/dehwyy/dehwyy-cli
 
 go 1.20
 
