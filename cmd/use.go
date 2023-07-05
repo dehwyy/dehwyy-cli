@@ -18,6 +18,8 @@ var (
 		Args: cobra.MinimumNArgs(1),
 		Run: runCmdUse,
 	}
+
+	isExec bool
 )
 
 func runCmdUse(cmd *cobra.Command, args[]string) {
