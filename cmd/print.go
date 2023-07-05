@@ -14,19 +14,21 @@ var (
 		Short: "Print strings with different formatting",
 		Long: "Print strings with different formatting in console",
 		Args: cobra.MinimumNArgs(1),
-		Run: func(cmd *cobra.Command, args[]string) {
-			s := strings.Join(args, " ")
-			switch  {
-			case stairs:
-				s = StairsCase(s)
-			}
-			fmt.Printf("%s\n", s)
-		},
+		Run: runCmdPrint,
 	}
 	// flags
 	stairs bool
 	capitalize bool
 )
+
+func runCmdPrint(cmd *cobra.Command, args[]string) {
+	s := strings.Join(args, " ")
+	switch  {
+	case stairs:
+		s = StairsCase(s)
+	}
+	fmt.Printf("%s\n", s)
+}
 
 func init() {
 	printCmd.Flags().BoolVarP(&stairs, "stairs", "s", false, "Print in stairsCase, e: stairs => StAiRs")
