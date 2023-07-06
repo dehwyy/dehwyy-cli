@@ -26,7 +26,9 @@ func runCmdPrint(cmd *cobra.Command, args[]string) {
 
 	switch  {
 		case stairs:
-			s = StairsCase(s)
+			s = toStairsCase(s)
+		case capitalize:
+			s = toCapitalize(s)
 	}
 
 	fmt.Printf("%s\n", s)
@@ -39,7 +41,7 @@ func init() {
 	rootCmd.AddCommand(printCmd)
 }
 
-func StairsCase(s string) string {
+func toStairsCase(s string) string {
 	var result string
 	c := 0
 
@@ -59,7 +61,7 @@ func StairsCase(s string) string {
 	return result
 }
 
-func Capitalize(s string) string {
+func toCapitalize(s string) string {
 	if len(s) == 0 {
 		return ""
 	}
