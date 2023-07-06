@@ -19,6 +19,7 @@ var (
 	// flags
 	stairs bool
 	capitalize bool
+	reverseCapitalize bool
 )
 
 func runCmdPrint(cmd *cobra.Command, args[]string) {
@@ -27,8 +28,13 @@ func runCmdPrint(cmd *cobra.Command, args[]string) {
 	switch  {
 		case stairs:
 			s = toStairsCase(s)
+
 		case capitalize:
 			s = toCapitalize(s)
+
+		case reverseCapitalize:
+			s = toReverseCapitalize(s)
+
 	}
 
 	fmt.Printf("%s\n", s)
@@ -37,6 +43,7 @@ func runCmdPrint(cmd *cobra.Command, args[]string) {
 func init() {
 	printCmd.Flags().BoolVarP(&stairs, "stairs", "s", false, "Print in stairsCase, e: stairs => StAiRs")
 	printCmd.Flags().BoolVarP(&capitalize, "capital", "c", false, "Print capitalized, e: cap => Cap")
+	printCmd.Flags().BoolVarP(&reverseCapitalize, "reverseCapital", "r", false, "Print reverseCapitalized, e: cap => cAP")
 
 	rootCmd.AddCommand(printCmd)
 }
@@ -69,6 +76,19 @@ func toCapitalize(s string) string {
 	runes := []rune(s)
 	// from LowerCase to UpperCase
 	runes[0] = runes[0] - 32
+
+	return string(runes)
+}
+
+func toReverseCapitalize(s string) string {
+	if len(s) == 0 {
+		return ""
+	}
+
+	s = strings.ToUpper(s)
+	runes := []rune(s)
+	// from UpperCase to LowerCase
+	runes[0] = runes[0] + 32
 
 	return string(runes)
 }
