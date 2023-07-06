@@ -4,4 +4,4 @@
 
 test:
 	# runs cmd's tests
-	cd cmd && go test
+	cd cmd && go test -cover
