@@ -1,14 +1,12 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
-	"log"
-	"net/http"
 	"net/url"
 	"os"
 	"strings"
 
+	"github.com/dehwyy/dehwyy-cli/utils"
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/spf13/cobra"
 )
@@ -38,11 +36,11 @@ type JishoResponse struct {
 		Jlpt     []string
 		Japanese []struct {
 			Word    string
-			Reading string `json:"reading"`
-		} `json:"japanese"`
+			Reading string
+		}
 		Senses []struct {
 			EnglishDefinitions []string `json:"english_definitions"`
-		} `json:"senses"`
+		}
 	}
 }
 
@@ -53,24 +51,14 @@ func runCmdJp(cmd *cobra.Command, args []string) {
 	url := baseUrl + fmt.Sprintf("words?keyword=%s", string(word))
 
 	var body JishoResponse
-	fetchUrl(url, &body)
+	utils.FetchUrl(url, &body)
 
-	makeTable(body, maxLen)
+	makeTableJp(body, maxLen)
 }
 
-// urlFetcher witch stores body in "v"
-func fetchUrl(url string, v interface{}) {
-	res, err := http.Get(url)
-	if err != nil {
-		log.Fatalf("Error fetching Jisho: %v", err)
-	}
 
-	defer res.Body.Close()
 
-	json.NewDecoder(res.Body).Decode(v)
-}
-
-func makeTable(tableData JishoResponse, maxLen int) {
+func makeTableJp(tableData JishoResponse, maxLen int) {
 	t := table.NewWriter()
 	t.SetOutputMirror(os.Stdout)
 
