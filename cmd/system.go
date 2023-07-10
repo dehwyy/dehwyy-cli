@@ -2,12 +2,12 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"os/user"
 	"runtime"
 	"strings"
 
+	e "github.com/dehwyy/dehwyy-cli/error-handler"
 	"github.com/spf13/cobra"
 )
 
@@ -21,6 +21,11 @@ var (
 	}
 )
 
+func init() {
+	systemCmd.SetHelpTemplate(getHelperString())
+	rootCmd.AddCommand(systemCmd)
+}
+
 func runCmdSystem(cmd *cobra.Command, args[]string) {
 	// if no arg was provided it would reply with helpFunc
 	if len(args) == 0 {
@@ -30,38 +35,26 @@ func runCmdSystem(cmd *cobra.Command, args[]string) {
 
 	var output string
 
-
 	switch strings.ToLower(args[0]) {
 		case "os":
 			output = fmt.Sprintf("Operating system: %s", runtime.GOOS)
 
-
+		// About Host
 		case "hostname":
-			hostname, err := os.Hostname()
-			if err != nil {
-				log.Fatalf("Error occured: %v", err)
-			}
-
+			hostname := e.WithFatal(os.Hostname())("Error occured")
+			//
 			output = fmt.Sprintf("Current hostname: %s", hostname)
 
+		// About User
 		case "user":
-
-			user, err := user.Current()
-			if err != nil {
-				log.Fatalf("Error occured: %v", err)
-				return
-			}
-
+			user := e.WithFatal(user.Current())("Error occured")
+			//
 			output = fmt.Sprintf("Current user: %s", user.Username)
 
+		// CurrentUser Homedir
 		case "homedir":
-
-			homedir, err := os.UserHomeDir()
-			if err != nil {
-				log.Fatalf("Error occured: %v", err)
-				return
-			}
-
+			homedir := e.WithFatal(os.UserHomeDir())("Error occured")
+			//
 			output = fmt.Sprintf("Home directory: %s", homedir)
 
 		// if such arg does not exists at previous cases => helpFunc with warning message
@@ -70,17 +63,13 @@ func runCmdSystem(cmd *cobra.Command, args[]string) {
 			output = getHelperString()
 	}
 
-
 	fmt.Println(output)
 }
 
-func init() {
-	systemCmd.SetHelpTemplate(getHelperString())
-	rootCmd.AddCommand(systemCmd)
-}
 
 func getHelperString() string {
 	/*
+		Output is like:
 		1. usage
 		2. description
 	*/
@@ -98,6 +87,7 @@ func getHelperString() string {
 		{"user", "Returns current user"},
 		{"homedir", "Returns home directory"},
 	}
+
 	var commandUsageString string
 	for _, cmd := range commands {
 		commandUsageString += fmt.Sprintf("  %s \t\t%s\n", cmd.cmd, cmd.meaning)

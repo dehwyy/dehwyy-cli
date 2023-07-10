@@ -20,11 +20,11 @@ var (
 		Run: runCmdJp,
 	}
 
-	maxLen int
+	FlagMaxLenJp int
 )
 
 func init() {
-	cmdJp.Flags().IntVarP(&maxLen, "len", "l", -1, "Define max length of matching words. For limitless words use -1 (specified by default)")
+	cmdJp.Flags().IntVarP(&FlagMaxLenJp, "len", "l", -1, "Define max length of matching words. For limitless words use -1 (specified by default)")
 	rootCmd.AddCommand(cmdJp)
 }
 
@@ -48,12 +48,14 @@ func runCmdJp(cmd *cobra.Command, args []string) {
 	baseUrl := "http://beta.jisho.org/api/v1/search/"
 	word := url.PathEscape(args[0])
 
+	// summary url
 	url := baseUrl + fmt.Sprintf("words?keyword=%s", string(word))
 
 	var body JishoResponse
 	utils.FetchUrl(url, &body)
 
-	makeTableJp(body, maxLen)
+	// rendering table
+	makeTableJp(body, FlagMaxLenJp)
 }
 
 
@@ -69,11 +71,11 @@ func makeTableJp(tableData JishoResponse, maxLen int) {
 			break
 		}
 
-		eng := strings.Join(w.Senses[0].EnglishDefinitions, ",")
+		englishWord := strings.Join(w.Senses[0].EnglishDefinitions, ",")
 		japKanji := w.Japanese[0].Word
 		japReading := w.Japanese[0].Reading
 
-		t.AppendRow(table.Row{eng, japKanji, japReading})
+		t.AppendRow(table.Row{englishWord, japKanji, japReading})
 		t.AppendSeparator()
 	}
 

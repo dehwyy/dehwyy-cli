@@ -2,11 +2,11 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"net/url"
 	"os"
-	"strings"
 
+	e "github.com/dehwyy/dehwyy-cli/error-handler"
+	"github.com/dehwyy/dehwyy-cli/ternary"
 	"github.com/dehwyy/dehwyy-cli/utils"
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/spf13/cobra"
@@ -45,30 +45,21 @@ type YandexResponse struct {
 }
 
 func runCmdEng(cmd *cobra.Command, args []string) {
-	// loading env and getting API_KEY
+	// getting API_KEY from .env
 	utils.LoadEnv()
 	key, _ := os.LookupEnv("YANDEX_TRANSLATE_API_KEY")
 
-	// which word to look in dict
 	word := args[0]
-
 	// Parsing word to prevent possible collapses that could happen due to non-english request
 	wordInUrl := url.PathEscape(word)
 
 	// clarifying whether word is english or russian, err appears when any symbol is other then previous
-	isEng, err := utils.IsEnglishWord(word)
-	if err != nil {
-		log.Fatalln(err.Error())
-	}
+	isEng := e.WithFatal(utils.IsEnglishWord(word))("Word should contain symbol from one language")
 
-	var translate string
+	// if isEng => en-ru else ru-en
+	var translate = ternary.Use(isEng, "en-ru", "ru-en")
 
-	if isEng {
-		translate = "en-ru"
-	} else {
-		translate = "ru-en"
-	}
-
+	// url to fetch
 	url := fmt.Sprintf("https://dictionary.yandex.net/api/v1/dicservice.json/lookup?key=%s&lang=%s&text=%s", key, translate, wordInUrl)
 
 	var body YandexResponse
@@ -88,28 +79,28 @@ func makeTableEn(tableData YandexResponse) {
 	t.AppendHeader(table.Row{"Word", "Translation", "Meaning", "Synonyms"})
 
 	for _, w := range tableData.Def {
-		word := w.Text
+		// word that was queried by user
+		queried_word := w.Text
 
+		// Iterating through all translations
 		for _, tr := range w.Tr {
-			// meaning
-			var mean []string
-			for _, m := range tr.Mean {
-				mean = append(mean, m.Text)
-			}
-			meanString := strings.Join(mean, ", ")
 
+			// meaning
+			var meaning string
+			for _, m := range tr.Mean {
+				meaning += fmt.Sprintf("%s, ", m.Text)
+			}
 			// translation
 			translation := tr.Text
 
 			// synonyms
-			var synonyms []string
+			var synonyms string
 			for _, syn := range tr.Syn {
-				synonyms = append(synonyms, syn.Text)
+				synonyms += fmt.Sprintf("%s, ", syn.Text)
 			}
-			synonymsString := strings.Join(synonyms, ", ")
 
 			// adding to the table
-			t.AppendRow(table.Row{word, translation, meanString, synonymsString})
+			t.AppendRow(table.Row{queried_word, translation, meaning, synonyms})
 			t.AppendSeparator()
 		}
 

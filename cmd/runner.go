@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/dehwyy/dehwyy-cli/database"
+	e "github.com/dehwyy/dehwyy-cli/error-handler"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/spf13/cobra"
 )
@@ -21,13 +22,22 @@ var (
 		Run: runCmdRunner,
 	}
 	// flags
-	add string // adding new template
-	exc string // executing template
-	del string // deleting template
+	flagAdd string // adding new template
+	flagExecute string // executing template
+	flagDelete string // deleting template
 )
 
+func init() {
+	runnerCmd.Flags().StringVarP(&flagAdd, "add", "a", "", "Add a template")
+	runnerCmd.Flags().StringVarP(&flagExecute, "exec", "e", "", "Execute predefined command by its name")
+	runnerCmd.Flags().StringVarP(&flagDelete, "delete", "d", "", "Delete predefined command by its name")
+	rootCmd.AddCommand(runnerCmd)
+}
+
+
 func runCmdRunner(cmd *cobra.Command, args[]string) {
-	if !ProvidedLessThanTwoFlags(add, exc, del) {
+	// clarifying that either zero or one flag was provided
+	if !providedLessThanTwoFlags(flagAdd, flagExecute, flagDelete) {
 		fmt.Println("Only one flag should be provided")
 		return
 	}
@@ -45,21 +55,21 @@ func runCmdRunner(cmd *cobra.Command, args[]string) {
 	switch {
 		// _____________________
 		// Adding new templatee
-		case len(add) > 0:
+		case len(flagAdd) > 0:
 			for _, cmd := range args {
-				db.AddCommandByKey(cmd, add)
+				db.AddCommandByKey(cmd, flagAdd)
 			}
 
 			if len(args) == 0 {
 				fmt.Println("At least one command should be provided")
 			} else {
-				fmt.Printf("Added new template '%s'\n", add)
+				fmt.Printf("Added new template '%s'\n", flagAdd)
 			}
 
 		// _____________________
 		// Querying for template and executing its commands
-		case len(exc) > 0:
-			rows := db.GetCommandsByKey(exc)
+		case len(flagExecute) > 0:
+			rows := db.GetCommandsByKey(flagExecute)
 
 			// if i == 0 => no rows.Next() was ever called => no rows were found
 			var i int
@@ -74,23 +84,23 @@ func runCmdRunner(cmd *cobra.Command, args[]string) {
 			}
 
 			if i == 0 {
-				fmt.Printf("Template '%s' wasn't found\n", exc)
+				fmt.Printf("Template '%s' wasn't found\n", flagExecute)
 			} else {
-				fmt.Printf("Successfully executed template '%s'\n", exc)
+				fmt.Printf("Successfully executed template '%s'\n", flagExecute)
 			}
 
 		// _________________
 		// deleting template
-		case len(del) > 0:
-			rowsAffected := db.DeleteTemplateByKey(del)
+		case len(flagDelete) > 0:
+			rowsAffected := db.DeleteTemplateByKey(flagDelete)
 
 			if rowsAffected == 0 {
-				fmt.Printf("Template '%s' wasn't found\n", del)
+				fmt.Printf("Template '%s' wasn't found\n", flagDelete)
 			} else {
-				fmt.Printf("Successfully deleted template '%s'\n", del)
+				fmt.Printf("Successfully deleted template '%s'\n", flagDelete)
 			}
 
-		// works as a helper
+		// works as a helper (-- help)
 		default:
 			rows := db.GetAvailableCommands()
 
@@ -103,6 +113,8 @@ func runCmdRunner(cmd *cobra.Command, args[]string) {
 				// appending template with TAB at the beginning
 				templates = append(templates, fmt.Sprintf("\t%s", template))
 			}
+
+			// if there is no any templates => printing HelpingCommand
 			if len(templates) == 0 {
 				fmt.Println("No template yet! Create your first by typing 'dehwyy-cli runner -a [template-name] [...commands] '")
 			} else {
@@ -115,13 +127,11 @@ func executeCommand(command string) {
 	// args[0] is main command like "code" or "ls", args[1:] are parameters
 	args := strings.Split(command, " ")
 
-	e := exec.Command(args[0],args[1:]...).Start()
-	if e != nil {
-		logger.Fatalf("Error occured: %v\n", e)
-	}
+	cmd := exec.Command(args[0],args[1:]...)
+	e.WithFatalString(cmd.Start(), "Error occured")
 }
 
-func ProvidedLessThanTwoFlags(flags ...string) bool {
+func providedLessThanTwoFlags(flags ...string) bool {
 	var truthyStringCounter int
 
 	for _, flag := range flags {
@@ -133,11 +143,4 @@ func ProvidedLessThanTwoFlags(flags ...string) bool {
 		}
 	}
 	return true
-}
-
-func init() {
-	runnerCmd.Flags().StringVarP(&add, "add", "a", "", "Add a template")
-	runnerCmd.Flags().StringVarP(&exc, "exec", "e", "", "Execute predefined command by its name")
-	runnerCmd.Flags().StringVarP(&del, "del", "d", "", "Delete predefined command by its name")
-	rootCmd.AddCommand(runnerCmd)
 }

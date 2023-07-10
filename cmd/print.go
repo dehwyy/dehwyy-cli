@@ -17,22 +17,22 @@ var (
 		Run: runCmdPrint,
 	}
 	// flags
-	stairs bool
-	capitalize bool
-	reverseCapitalize bool
+	flagStairs bool
+	flagCapitalize bool
+	flagReverseCapitalize bool
 )
 
 func runCmdPrint(cmd *cobra.Command, args[]string) {
 	s := strings.Join(args, " ")
 
 	switch  {
-		case stairs:
+		case flagStairs:
 			s = toStairsCase(s)
 
-		case capitalize:
+		case flagCapitalize:
 			s = toCapitalize(s)
 
-		case reverseCapitalize:
+		case flagReverseCapitalize:
 			s = toReverseCapitalize(s)
 
 	}
@@ -41,12 +41,14 @@ func runCmdPrint(cmd *cobra.Command, args[]string) {
 }
 
 func init() {
-	printCmd.Flags().BoolVarP(&stairs, "stairs", "s", false, "Print in stairsCase, e: stairs => StAiRs")
-	printCmd.Flags().BoolVarP(&capitalize, "capital", "c", false, "Print capitalized, e: cap => Cap")
-	printCmd.Flags().BoolVarP(&reverseCapitalize, "reverseCapital", "r", false, "Print reverseCapitalized, e: cap => cAP")
+	printCmd.Flags().BoolVarP(&flagStairs, "stairs", "s", false, "Print in stairsCase, e: stairs => StAiRs")
+	printCmd.Flags().BoolVarP(&flagCapitalize, "capital", "c", false, "Print capitalized, e: cap => Cap")
+	printCmd.Flags().BoolVarP(&flagReverseCapitalize, "reverseCapital", "r", false, "Print reverseCapitalized, e: cap => cAP")
 
 	rootCmd.AddCommand(printCmd)
 }
+
+// string mutator functions
 
 func toStairsCase(s string) string {
 	var result string

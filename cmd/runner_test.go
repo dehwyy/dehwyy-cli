@@ -7,7 +7,7 @@ import (
 )
 
 func testProvidedFlags(t *testing.T, expected bool, flags []string, n int) {
-	actual := ProvidedLessThanTwoFlags(flags...)
+	actual := providedLessThanTwoFlags(flags...)
 
 	if expected != actual {
 		log.Fatalf("Expected %t, got %t", expected, actual)
