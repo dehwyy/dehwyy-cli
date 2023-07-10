@@ -9,7 +9,6 @@ import (
 
 	"github.com/dehwyy/dehwyy-cli/database"
 	sql_database "github.com/dehwyy/dehwyy-cli/database/sql"
-	e "github.com/dehwyy/dehwyy-cli/error-handler"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/spf13/cobra"
 )
@@ -130,7 +129,10 @@ func executeCommand(command string) {
 	args := strings.Split(command, " ")
 
 	cmd := exec.Command(args[0],args[1:]...)
-	e.WithFatalString(cmd.Start(), "Error occured")
+
+	if err := cmd.Run(); err != nil {
+		log.Fatalf("Error occured %v\n" ,err)
+	}
 }
 
 func providedLessThanTwoFlags(flags ...string) bool {

@@ -7,7 +7,6 @@ import (
 	"runtime"
 	"strings"
 
-	e "github.com/dehwyy/dehwyy-cli/error-handler"
 	"github.com/spf13/cobra"
 )
 
@@ -41,19 +40,19 @@ func runCmdSystem(cmd *cobra.Command, args[]string) {
 
 		// About Host
 		case "hostname":
-			hostname := e.WithFatal(os.Hostname())("Error occured")
+			hostname, _ := os.Hostname()
 			//
 			output = fmt.Sprintf("Current hostname: %s", hostname)
 
 		// About User
 		case "user":
-			user := e.WithFatal(user.Current())("Error occured")
+			user, _ := user.Current()
 			//
 			output = fmt.Sprintf("Current user: %s", user.Username)
 
 		// CurrentUser Homedir
 		case "homedir":
-			homedir := e.WithFatal(os.UserHomeDir())("Error occured")
+			homedir, _ := os.UserHomeDir()
 			//
 			output = fmt.Sprintf("Home directory: %s", homedir)
 

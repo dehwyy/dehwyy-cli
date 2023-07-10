@@ -2,10 +2,10 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 	"net/url"
 	"os"
 
-	e "github.com/dehwyy/dehwyy-cli/error-handler"
 	"github.com/dehwyy/dehwyy-cli/ternary"
 	"github.com/dehwyy/dehwyy-cli/utils"
 	"github.com/jedib0t/go-pretty/v6/table"
@@ -18,7 +18,7 @@ var (
 		Short: "Translate from Russian to English or from English to Russian",
 		Long: "Translate from Russian to English or from English to Russian using YandexDictionary",
 		Args: cobra.ExactArgs(1),
-		Run: runCmdEng,
+		Run: runCmdEn,
 	}
 
 )
@@ -44,7 +44,7 @@ type YandexResponse struct {
 	}
 }
 
-func runCmdEng(cmd *cobra.Command, args []string) {
+func runCmdEn(cmd *cobra.Command, args []string) {
 	// getting API_KEY from .env
 	utils.LoadEnv()
 	key, _ := os.LookupEnv("YANDEX_TRANSLATE_API_KEY")
@@ -54,7 +54,10 @@ func runCmdEng(cmd *cobra.Command, args []string) {
 	wordInUrl := url.PathEscape(word)
 
 	// clarifying whether word is english or russian, err appears when any symbol is other then previous
-	isEng := e.WithFatal(utils.IsEnglishWord(word))("Word should contain symbol from one language")
+	isEng, err := utils.IsEnglishWord(word)
+	if err != nil {
+		log.Fatalln(err)
+	}
 
 	// if isEng => en-ru else ru-en
 	var translate = ternary.Use(isEng, "en-ru", "ru-en")

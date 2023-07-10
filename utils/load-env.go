@@ -1,10 +1,14 @@
 package utils
 
 import (
-	e "github.com/dehwyy/dehwyy-cli/error-handler"
+	"log"
+
 	"github.com/joho/godotenv"
 )
 
 func LoadEnv() {
-	e.WithFatalString(godotenv.Load(), "Cannot load env")
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatalln("Cannot load .env file")
+	}
 }
