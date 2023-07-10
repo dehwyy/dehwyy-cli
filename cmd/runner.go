@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/dehwyy/dehwyy-cli/database"
+	sql_database "github.com/dehwyy/dehwyy-cli/database/sql"
 	e "github.com/dehwyy/dehwyy-cli/error-handler"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/spf13/cobra"
@@ -42,11 +43,12 @@ func runCmdRunner(cmd *cobra.Command, args[]string) {
 		return
 	}
 
-	// runner.db instance
-	db := new(database.RunnerDB)
+	// db instance
+	sql_db := new(sql_database.Sqlite)
 
-	// init and close right before the end of the function
-	db.Init()
+	// runner queries instance
+	db := database.New(sql_db)
+	//  close right before the end of the function
 	defer db.Close()
 
 	// Making table 'commands' if there is no

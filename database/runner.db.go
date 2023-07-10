@@ -2,23 +2,28 @@ package database
 
 import (
 	"database/sql"
-	"fmt"
-
-	e "github.com/dehwyy/dehwyy-cli/error-handler"
+	"log"
 )
 
 type RunnerDB struct {
 	db *sql.DB
 }
 
-// Base
+// must have method for sql interpreter
+type SqlDatabase interface {
+	New() *sql.DB
+}
 
-func (r *RunnerDB) Init() {
-	r.db = InitDB()
+//
+
+func New(db SqlDatabase) *RunnerDB {
+	return &RunnerDB{
+		db: db.New (),
+	}
 }
 
 func (r *RunnerDB) Close() {
-	CloseDB(r.db)
+	r.db.Close()
 }
 
 // Execution
@@ -26,25 +31,44 @@ func (r *RunnerDB) Close() {
 func (r *RunnerDB) CreateTableIfNotExists() {
 	 const query = "CREATE TABLE IF NOT EXISTS commands (id INTEGER PRIMARY KEY, command TEXT, key TEXT)"
 
-	e.WithFatal(r.db.Exec(query))("Cannot create table")
+	st, err := r.db.Prepare(query)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	_, err = st.Exec()
+	if err != nil {
+		log.Fatalf("Cannot create table %v\n", err)
+	}
 }
 
 func (r* RunnerDB) AddCommandByKey(cmd, key string) {
 	const query = "INSERT INTO commands (command, key) VALUES (?, ?)"
 
-	// message that would appear on error
-	errorMessage := fmt.Sprintf("Cannot create template %s with command %s", key, cmd)
+	st, err := r.db.Prepare(query)
+	if err != nil {
+		log.Fatalln(err)
+	}
 
-	e.WithFatal(r.db.Exec(query, cmd, key))(errorMessage)
+	_, err = st.Exec(cmd, key)
+	if err != nil {
+		log.Fatalf("Cannot create template %s with command %s", key, cmd)
+	}
 }
 
 func (r *RunnerDB) DeleteTemplateByKey(key string) int64 {
 	const query = "DELETE FROM commands WHERE KEY = ?"
 
-	// message that would appear on error
-	errorMessage := fmt.Sprintf("Cannot delete template %s", key)
+	st, err := r.db.Prepare(query)
+	if err != nil {
+		log.Fatalln(err)
+	}
 
-	result := e.WithFatal(r.db.Exec(query, key))(errorMessage)
+	result, err := st.Exec(key)
+	if err != nil {
+		log.Fatalf("Cannot delete template %s", key)
+	}
+
 	// Ignoring error due to fact written in docs:
 	// Sqlite supports this function
 	rowsAffected, _ := result.RowsAffected()
@@ -57,7 +81,15 @@ func (r *RunnerDB) DeleteTemplateByKey(key string) int64 {
 func (r* RunnerDB) GetCommandsByKey(key string) *sql.Rows  {
 	const query = "SELECT command from commands WHERE KEY = ?"
 
-	rows := e.WithFatal(r.db.Query(query, key))("Cannot query database")
+	st, err := r.db.Prepare(query)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	rows, err := st.Query(key)
+	if err != nil {
+		log.Fatalf("Cannot query database: %v", err)
+	}
 
 	return rows
 }
@@ -65,7 +97,15 @@ func (r* RunnerDB) GetCommandsByKey(key string) *sql.Rows  {
 func (r *RunnerDB) GetAvailableCommands() *sql.Rows {
 	const query = "SELECT DISTINCT key FROM commands"
 
-	rows := e.WithFatal(r.db.Query(query))("Cannot query database")
+	st, err := r.db.Prepare(query)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	rows, err := st.Query()
+	if err != nil {
+		log.Fatalf("Cannot query database: %v", err)
+	}
 
 	return rows
 }
