@@ -7,6 +7,7 @@ import (
 
 func IsEnglishWord(word string) (bool, error) {
 	var isEng bool
+
 	for i, char := range word {
 		if i == 0 {
 			isEng = unicode.Is(unicode.Latin, char)

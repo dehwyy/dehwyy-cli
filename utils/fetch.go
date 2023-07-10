@@ -2,17 +2,16 @@ package utils
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
+
+	e "github.com/dehwyy/dehwyy-cli/error-handler"
 )
 
-func FetchUrl(url string, v interface{}) {
-	res, err := http.Get(url)
-	if err != nil {
-		log.Fatalf("Error fetching Jisho: %v", err)
-	}
+func FetchUrl(url string, v interface{}) int {
+	response := e.WithFatal(http.Get(url))("Error fetching")
 
-	defer res.Body.Close()
+	defer response.Body.Close()
+	json.NewDecoder(response.Body).Decode(v)
 
-	json.NewDecoder(res.Body).Decode(v)
+	return response.StatusCode
 }
