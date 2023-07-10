@@ -2,22 +2,16 @@ package database
 
 import (
 	"database/sql"
-	"log"
+
+	e "github.com/dehwyy/dehwyy-cli/error-handler"
 )
 
 func InitDB() *sql.DB {
-	db, e := sql.Open("sqlite3", "./db.sqlite")
-
-	if e != nil {
-			log.Fatalf("Cannot open database: %v", e)
-	}
+	db := e.WithFatal(sql.Open("sqlite3", "./db.sqlite"))("Cannot open database")
 
 	return db
 }
 
 func CloseDB(db *sql.DB) {
-	e := db.Close()
-	if e != nil {
-		log.Fatalf("Cannot close database: %v", e)
-	}
+	e.WithFatalString(db.Close(), "Cannot close database")
 }

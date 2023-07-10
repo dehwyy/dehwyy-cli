@@ -2,12 +2,16 @@ package database
 
 import (
 	"database/sql"
-	"log"
+	"fmt"
+
+	e "github.com/dehwyy/dehwyy-cli/error-handler"
 )
 
 type RunnerDB struct {
 	db *sql.DB
 }
+
+// Base
 
 func (r *RunnerDB) Init() {
 	r.db = InitDB()
@@ -17,26 +21,30 @@ func (r *RunnerDB) Close() {
 	CloseDB(r.db)
 }
 
+// Execution
+
 func (r *RunnerDB) CreateTableIfNotExists() {
-	_, err := r.db.Exec("CREATE TABLE IF NOT EXISTS commands (id INTEGER PRIMARY KEY, command TEXT, key TEXT)")
-	if err != nil {
-		log.Fatalf("Cannot create table: %v", err)
-	}
+	 const query = "CREATE TABLE IF NOT EXISTS commands (id INTEGER PRIMARY KEY, command TEXT, key TEXT)"
+
+	e.WithFatal(r.db.Exec(query))("Cannot create table")
 }
 
 func (r* RunnerDB) AddCommandByKey(cmd, key string) {
-	_, err := r.db.Exec("INSERT INTO commands (command, key) VALUES (?, ?)", cmd, key)
-	if err != nil {
-			log.Fatalf("Cannot create template %s with command %s: %v", key, cmd, err)
-	}
+	const query = "INSERT INTO commands (command, key) VALUES (?, ?)"
+
+	// message that would appear on error
+	errorMessage := fmt.Sprintf("Cannot create template %s with command %s", key, cmd)
+
+	e.WithFatal(r.db.Exec(query, cmd, key))(errorMessage)
 }
 
 func (r *RunnerDB) DeleteTemplateByKey(key string) int64 {
-	result , err := r.db.Exec("DELETE FROM commands WHERE KEY = ?", key)
-	if err != nil {
-		log.Fatalf("Cannot delete template %s: %v", key, err)
-	}
+	const query = "DELETE FROM commands WHERE KEY = ?"
 
+	// message that would appear on error
+	errorMessage := fmt.Sprintf("Cannot delete template %s", key)
+
+	result := e.WithFatal(r.db.Exec(query, key))(errorMessage)
 	// Ignoring error due to fact written in docs:
 	// Sqlite supports this function
 	rowsAffected, _ := result.RowsAffected()
@@ -44,19 +52,20 @@ func (r *RunnerDB) DeleteTemplateByKey(key string) int64 {
 	return rowsAffected
 }
 
+// Queries
+
 func (r* RunnerDB) GetCommandsByKey(key string) *sql.Rows  {
-	rows, err := r.db.Query("SELECT command from commands WHERE KEY = ?", key)
-	if err != nil {
-		log.Fatalf("Cannot query database: %v\n", err)
-	}
+	const query = "SELECT command from commands WHERE KEY = ?"
+
+	rows := e.WithFatal(r.db.Query(query, key))("Cannot query database")
 
 	return rows
 }
 
 func (r *RunnerDB) GetAvailableCommands() *sql.Rows {
-	rows, err := r.db.Query("SELECT DISTINCT key FROM commands")
-	if err != nil {
-		log.Fatalf("Cannot query database: %v\n", err)
-	}
+	const query = "SELECT DISTINCT key FROM commands"
+
+	rows := e.WithFatal(r.db.Query(query))("Cannot query database")
+
 	return rows
 }
