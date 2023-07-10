@@ -30,9 +30,9 @@ Command that make an easy access to information about current PC:
   # for more information
   dehwyy-cli system
   # either
-  dehwyy-cli system --help 
+  dehwyy-cli system --help
 ```
-### Runner
+### Runner (only linux)
 Runner is a terminalScriptRunner, it's easy to manage usage of several commands by using just one:
 ```zsh
   dehwyy-cli runner -add onStartOs "code ." "easyeffects" "gnome-tweaks"
