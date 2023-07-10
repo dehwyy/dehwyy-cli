@@ -6,5 +6,5 @@ import (
 )
 
 func LoadEnv() {
-	e.WithFatalString(godotenv.Load(".env"), "Cannot load env")
+	e.WithFatalString(godotenv.Load(), "Cannot load env")
 }

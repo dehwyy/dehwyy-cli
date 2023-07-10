@@ -9,9 +9,9 @@ import (
 func TestLoadEnv(t *testing.T) {
 	LoadEnv()
 
-	envValue := os.Getenv("API_KEY")
-	if envValue != "WOLF" {
-		t.Errorf("Expected 'WOLF', got %s", envValue)
+	envValue := os.Getenv("YANDEX_TRANSLATE_API_KEY")
+	if len(envValue) == 0 {
+		t.Errorf("Expected not nil value', got %s", envValue)
 	} else {
 		fmt.Println("LoadEnv passed")
 	}

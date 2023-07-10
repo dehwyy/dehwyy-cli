@@ -3,17 +3,17 @@
 
 
 test-cmd:
-	# runs cmd's tests
+# runs cmd's tests
 	cd cmd && go test -cover
 
 test-error:
-	# runs error's tests
+# runs error's tests
 	cd error-h && go test -cover
 
 test-utils:
-	# runs utils' tests
+# runs utils' tests
 	cd utils && go test -cover
 
 test-ternary:
-	# runs ternary's tests
+# runs ternary's tests
 	cd ternary && go test -cover
