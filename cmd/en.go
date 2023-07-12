@@ -95,19 +95,44 @@ func makeTableEn(tableData YandexResponse) {
 		// Iterating through all translations
 		for _, tr := range w.Tr {
 
+		//
 			// meaning
 			var meaning string
-			for _, m := range tr.Mean {
+
+			for i, m := range tr.Mean {
+				if len(meaning) > 75 && i > 2 {
+					break
+				}
+
 				meaning += fmt.Sprintf("%s, ", m.Text)
 			}
+
+			// removing last comma
+			if len(meaning) > 0 {
+				meaning = meaning[0:len(meaning) - 2]
+			}
+		//
+
+		//
 			// translation
 			translation := tr.Text
 
 			// synonyms
 			var synonyms string
-			for _, syn := range tr.Syn {
-				synonyms += fmt.Sprintf("%s, ", syn.Text)
+
+			for i, syn := range tr.Syn {
+				if len(synonyms) > 75 && i > 2 {
+					break
+				}
+
+				synonyms += fmt.Sprintf("%s,", syn.Text)
 			}
+
+			// removing the last comma
+			if len(synonyms) > 0 {
+				synonyms = synonyms[0:len(synonyms) - 1]
+			}
+		//
 
 			// adding to the table
 			t.AppendRow(table.Row{queried_word, translation, meaning, synonyms})
