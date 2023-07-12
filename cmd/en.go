@@ -21,9 +21,11 @@ var (
 		Run: runCmdEn,
 	}
 
+	flagMaxLenEn int
 )
 
 func init() {
+	cmdEng.Flags().IntVarP(&flagMaxLenEn, "len", "l", -1, "Define max length of matching words. For limitless words use -1 (specified by default)")
 	rootCmd.AddCommand(cmdEng)
 }
 
@@ -81,7 +83,12 @@ func makeTableEn(tableData YandexResponse) {
 	// Rows' names
 	t.AppendHeader(table.Row{"Word", "Translation", "Meaning", "Synonyms"})
 
-	for _, w := range tableData.Def {
+	for i, w := range tableData.Def {
+		// if limit reached => quit
+		if i == flagMaxLenEn {
+			break
+		}
+
 		// word that was queried by user
 		queried_word := w.Text
 
